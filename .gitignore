@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Spotify Data Analyzer/my_spotify_data/MyData
+/Spotify Data Analyzer/Spotify Data
+/Spotify Data Analyzer/my_spotify_data.zip
+/Spotify Data Analyzer/output.txt
