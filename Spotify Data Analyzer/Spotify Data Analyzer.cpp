@@ -1,20 +1,56 @@
-// Spotify Data Analyzer.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include <vector>
+#include <utility>
+#include <fstream>
+#include "ProcessData.h"
+#include "Song.h"
+
+using namespace std;
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	setlocale(LC_CTYPE, "Polish");
+	ProcessData::create_folder();
+	cout << "Wrzuæ pliki .json do folderu Spotify Data i potwierdŸ to przez wpisanie Y" << endl;
+	string answer;
+	do
+	{
+		cin >> answer;
+	} while (answer != "Y");
+	ProcessData::read_file_names();
+	vector<Song> songs = ProcessData::parse_files("Audio");
+	vector<pair<string, int>> licznik;
+	unsigned long long ms = 0;
+	for (auto& song : songs)
+	{
+		ms += song.get_ms_played();
+		bool found = false;
+		for (auto& p : licznik)
+		{
+			if (song.get_track_name() == p.first)
+			{
+				found = true;
+				p.second++;
+			}
+		}
+		if (!found)
+		{
+			licznik.emplace_back(song.get_track_name(), 1);
+		}
+	}
+	setlocale(LC_CTYPE, "Polish");
+	cout << "\nCa³kowity czas s³uchania: " << ms/60000 << " minut \n";
+	cout << "\nNajczêœciej s³uchane nuty od za³o¿enia konta na spotify:\n";
+	std::setlocale(LC_CTYPE, "pl_PL.UTF-8");
+	std::sort(licznik.begin(), licznik.end(), [](const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
+		return a.second > b.second;
+		});
+	ofstream f("output.txt");
+	for (auto& p : licznik)
+	{
+		f << p.second << " " << p.first << endl;
+		cout << p.second << " " << p.first << endl;
+	}
+	f.close();
+	return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
