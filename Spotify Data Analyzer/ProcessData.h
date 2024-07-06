@@ -4,6 +4,9 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <thread>
+#include <future>
+#include <chrono>
 #include "nlohmann/json.hpp"
 #include "Song.h"
 
@@ -19,5 +22,6 @@ public:
 private:
 	ProcessData();
 	static vector<string> filenames;
+	static vector<Song> parse_file(string path);
 };
 

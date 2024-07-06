@@ -1,4 +1,4 @@
-#include "ProcessData.h"
+ï»¿#include "ProcessData.h"
 
 vector<string> ProcessData::filenames;
 
@@ -9,18 +9,18 @@ void ProcessData::create_folder()
     try {
         if (!std::filesystem::exists(folderName)) {
             if (std::filesystem::create_directory(folderName)) {
-                //std::cout << "Folder zosta³ utworzony." << std::endl;
+                //std::cout << "Folder zostaÅ‚ utworzony." << std::endl;
             }
             else {
-                std::cerr << "Nie uda³o siê utworzyæ folderu." << std::endl;
+                std::cerr << "Nie udaÅ‚o siÄ™ utworzyÄ‡ folderu." << std::endl;
             }
         }
         else {
-            //std::cout << "Folder ju¿ istnieje." << std::endl;
+            //std::cout << "Folder juÅ¼ istnieje." << std::endl;
         }
     }
     catch (const std::filesystem::filesystem_error& e) {
-        std::cerr << "B³¹d: " << e.what() << std::endl;
+        std::cerr << "BÅ‚Ä…d: " << e.what() << std::endl;
     }
 }
 
@@ -28,21 +28,22 @@ void ProcessData::read_file_names()
 {
     std::string path = "./Spotify Data";
 
-    // Sprawdzamy czy podana œcie¿ka jest folderem
+    // Sprawdzamy czy podana Å›cieÅ¼ka jest folderem
     if (fs::is_directory(path)) {
-        // Iterujemy po zawartoœci folderu
+        // Iterujemy po zawartoÅ›ci folderu
         for (const auto& entry : fs::directory_iterator(path)) {
             filenames.push_back(entry.path().filename().string());
             //std::cout << entry.path().filename().string() << std::endl;
         }
     }
     else {
-        std::cerr << "Podana œcie¿ka nie jest folderem." << std::endl;
+        std::cerr << "Podana Å›cieÅ¼ka nie jest folderem." << std::endl;
     }
 }
 
 vector<Song> ProcessData::parse_files(string type)
 {
+    auto start = std::chrono::high_resolution_clock::now();
     vector<Song> songs;
     std::setlocale(LC_CTYPE, "pl_PL.UTF-8");
     std::string path = "./Spotify Data/";
@@ -55,45 +56,70 @@ vector<Song> ProcessData::parse_files(string type)
             cout << s << endl;
         }
     }
-    for (auto& f : files_to_parse)
-    {
-        std::ifstream i(path + f);
 
-        // SprawdŸ czy plik jest otwarty poprawnie
-        if (!i.is_open()) {
-            std::cerr << "Nie mo¿na otworzyæ pliku " << path + f << std::endl;
-            exit(0);
-        }
+    // Tu uruchamiamy parse_file w osobnych wÄ…tkach
+    std::vector<std::future<std::vector<Song>>> futures;
+    for (const auto& file : files_to_parse) {
+        futures.push_back(std::async(std::launch::async, &ProcessData::parse_file, path + file));
+    }
 
-        // Wczytaj dane JSON z pliku
-        nlohmann::json j;
-        try {
-            i >> j;
-        }
-        catch (nlohmann::json::parse_error& e) {
-            i.close();
-            continue; // Pomijamy ten plik i kontynuujemy
-        }
+    // Czekamy na zakoÅ„czenie wszystkich wÄ…tkÃ³w i Å‚Ä…czymy wyniki w jeden wektor
+    for (auto& future : futures) {
+        std::vector<Song> partial_result = future.get();
+        songs.insert(songs.end(), std::make_move_iterator(partial_result.begin()), std::make_move_iterator(partial_result.end()));
+    }
 
-        // Zamknij plik
+    // Koniec pomiaru czasu
+    auto end = std::chrono::high_resolution_clock::now();
+
+    // Obliczanie czasu wykonania
+    auto duration = duration_cast<std::chrono::milliseconds>(end - start);
+
+    // WyÅ›wietlanie czasu wykonania
+    std::cout << "parse_files - czas wykonania: " << duration.count() << " ms" << std::endl;
+        
+    return songs;
+}
+
+vector<Song> ProcessData::parse_file(string path)
+{
+    vector<Song> songs;
+    std::ifstream i(path);
+
+    // SprawdÅº czy plik jest otwarty poprawnie
+    if (!i.is_open()) {
+        std::cerr << "Nie moÅ¼na otworzyÄ‡ pliku " << path << std::endl;
+        exit(0);
+    }
+
+    // Wczytaj dane JSON z pliku
+    nlohmann::json j;
+    try {
+        i >> j;
+    }
+    catch (nlohmann::json::parse_error& e) {
         i.close();
-        // Wyœwietl zawartoœæ za³adowan¹ z pliku JSON
-        for (const auto& entry : j) {
-            try {
-                songs.emplace_back(
-                    entry.value("master_metadata_album_album_name", ""),
-                    entry.value("master_metadata_album_artist_name", ""),
-                    entry.value("master_metadata_track_name", ""),
-                    entry.value("ms_played", 0),
-                    entry.value("offline_timestamp", 0),
-                    entry.value("platform", ""),
-                    entry.value("spotify_track_uri", "")
-                );
-            }
-            catch (nlohmann::json::type_error& e) {
-                std::cerr << "Error in json file " << path + f << ": " << e.what() << std::endl;
-                continue; // Pomijamy ten wpis i kontynuujemy
-            }
+        return songs; // Pomijamy ten plik i kontynuujemy
+    }
+
+    // Zamknij plik
+    i.close();
+    // WyÅ›wietl zawartoÅ›Ä‡ zaÅ‚adowanÄ… z pliku JSON
+    for (const auto& entry : j) {
+        try {
+            songs.emplace_back(
+                entry.value("master_metadata_album_album_name", ""),
+                entry.value("master_metadata_album_artist_name", ""),
+                entry.value("master_metadata_track_name", ""),
+                entry.value("ms_played", 0),
+                entry.value("offline_timestamp", 0),
+                entry.value("platform", ""),
+                entry.value("spotify_track_uri", "")
+            );
+        }
+        catch (nlohmann::json::type_error& e) {
+            //std::cerr << "Error in json file " << path << ": " << e.what() << std::endl;
+            continue; // Pomijamy ten wpis i kontynuujemy
         }
     }
     return songs;
