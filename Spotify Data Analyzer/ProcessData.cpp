@@ -48,6 +48,7 @@ vector<Song> ProcessData::parse_files(string type)
     std::setlocale(LC_CTYPE, "pl_PL.UTF-8");
     std::string path = "./Spotify Data/";
     vector<string>files_to_parse;
+    cout << "Znalezione pliki:\n";
     for (auto& s : filenames)
     {
         if (s.find(type) != std::string::npos)
@@ -76,7 +77,7 @@ vector<Song> ProcessData::parse_files(string type)
     auto duration = duration_cast<std::chrono::milliseconds>(end - start);
 
     // Wyświetlanie czasu wykonania
-    std::cout << "parse_files - czas wykonania: " << duration.count() << " ms" << std::endl;
+    //std::cout << "parse_files - czas wykonania: " << duration.count() << " ms" << std::endl;
         
     return songs;
 }

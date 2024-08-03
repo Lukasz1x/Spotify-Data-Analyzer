@@ -15,12 +15,12 @@ int main()
 {
 	setlocale(LC_CTYPE, "Polish");
 	ProcessData::create_folder();
-	//cout << "Wrzuæ pliki .json do folderu Spotify Data i potwierdŸ to przez wpisanie Y" << endl;
-	//string answer;
-	//do
-	//{
-	//	cin >> answer;
-	//} while (answer != "Y");
+	cout << "wrzuæ pliki .json do folderu spotify data i potwierdŸ to przez wpisanie y" << endl;
+	string answer;
+	do
+	{
+		cin >> answer;
+	} while (answer != "y");
 	ProcessData::read_file_names();
 	vector<Song> songs = ProcessData::parse_files("Audio");
 	vector<pair<string, int>> licznik = Song::count_songs(songs);
@@ -43,7 +43,10 @@ int main()
 		f2 << p.second/60000 << " " << p.first << endl;
 	}
 	f2.close();
-
+	setlocale(LC_CTYPE, "Polish");
+	cout << "W pliku count.txt podana jest liczba odtworzeñ dla ka¿dej piosenki.\n";
+	cout << "W pliku time.txt podana jest liczba minut s³uchania dla ka¿dej piosenki.\n";
+	system("pause");
 
 	return 0;
 }

@@ -36,7 +36,7 @@ unsigned long long Song::get_total_ms_played(vector<Song>songs)
     // Koniec pomiaru czasu
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "get_total_ms_played - czas wykonania: " << duration.count() << " ms" << std::endl;
+    //std::cout << "get_total_ms_played - czas wykonania: " << duration.count() << " ms" << std::endl;
     return ms;
 }
 vector<pair<string, int>> Song::count_songs(vector<Song>songs)
@@ -59,7 +59,7 @@ vector<pair<string, int>> Song::count_songs(vector<Song>songs)
     // Koniec pomiaru czasu
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "count_songs - czas wykonania: " << duration.count() << " ms" << std::endl;
+    //std::cout << "count_songs - czas wykonania: " << duration.count() << " ms" << std::endl;
     return licznik_vector;
 }
 
@@ -84,6 +84,6 @@ vector<pair<string, unsigned long long>> Song::count_ms_songs(vector<Song>songs)
     // Koniec pomiaru czasu
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "count_ms_songs - czas wykonania: " << duration.count() << " ms" << std::endl;
+    //std::cout << "count_ms_songs - czas wykonania: " << duration.count() << " ms" << std::endl;
     return licznik_vector;
 }
